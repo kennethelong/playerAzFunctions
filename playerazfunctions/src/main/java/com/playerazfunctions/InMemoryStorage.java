@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 public class InMemoryStorage implements StorageInterface{
 
-        private Map<String, PlayerRecord> fakePlayerData = new HashMap<>();
+        private static Map<String, PlayerRecord> fakePlayerData = new HashMap<>();
 
-        private Map<String, String> playersInRoom = new HashMap<>();
+        private static Map<String, String> playersInRoom = new HashMap<>();
 
     @Override
     public String initialize() {
@@ -53,16 +54,20 @@ public class InMemoryStorage implements StorageInterface{
             playersInRoom.remove(playerBeforeUpdate.getPositionAsString(), playerId);
         }
         if (record.isInCave()) {
+            System.out.println("adding to PlayersInRoom, player: " + playerId + " at potision: " + record.getPositionAsString());
             playersInRoom.put(record.getPositionAsString(), playerId);
         }
     }
 
     @Override
     public List<PlayerRecord> computeListOfPlayersAt(String positionString) {
-        List<PlayerRecord> playerList = new ArrayList<>();
-        playersInRoom.forEach((position, playerId) -> {
+        List<PlayerRecord> playerList = new ArrayList<>();    
+
+         playersInRoom.forEach((position, playerId) -> {
+            System.out.println("Inside the forEach loop");
             if (position.equals(positionString)) {
                 PlayerRecord player = fakePlayerData.get(playerId);
+                System.out.print("I'm adding:" + player + "\n");
                 playerList.add(player);
             }
         });
