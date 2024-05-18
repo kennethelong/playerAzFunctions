@@ -1,5 +1,6 @@
 package com.playerazfunctions;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,8 +59,15 @@ public class InMemoryStorage implements StorageInterface{
 
     @Override
     public List<PlayerRecord> computeListOfPlayersAt(String positionString) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'computeListOfPlayersAt'");
+        List<PlayerRecord> playerList = new ArrayList<>();
+        playersInRoom.forEach((position, playerId) -> {
+            if (position.equals(positionString)) {
+                PlayerRecord player = fakePlayerData.get(playerId);
+                playerList.add(player);
+            }
+        });
+
+        return playerList;
     }
     
 }

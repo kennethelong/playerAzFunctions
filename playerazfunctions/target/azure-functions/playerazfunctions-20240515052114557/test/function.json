@@ -1,12 +1,12 @@
 {
   "scriptFile" : "../playerazfunctions-1.0-SNAPSHOT.jar",
-  "entryPoint" : "com.playerazfunctions.Function.getPlayerById",
+  "entryPoint" : "com.playerazfunctions.Function.hello",
   "bindings" : [ {
     "type" : "httpTrigger",
     "direction" : "in",
     "name" : "req",
-    "route" : "v1/players/{id}",
-    "methods" : [ "GET" ],
+    "route" : "v1/players/test/",
+    "methods" : [ "POST" ],
     "authLevel" : "ANONYMOUS"
   }, {
     "type" : "http",

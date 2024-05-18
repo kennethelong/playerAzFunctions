@@ -50,7 +50,7 @@ public class Function {
 
     //get a player by player id
     @FunctionName("getPlayerById")
-    public HttpResponseMessage run2(
+    public HttpResponseMessage getPlayerById(
             @HttpTrigger(name = "req", 
             methods = {HttpMethod.GET}, 
             route="v1/players/{id}", 
@@ -67,5 +67,38 @@ public class Function {
         }    
         return request.createResponseBuilder(HttpStatus.OK).body("ID: " + id + " PlayerRecord is: " + pr.toString()).build();
     }
-   }
+
+        //Update or add player
+        @FunctionName("updatePlayer")
+        public HttpResponseMessage updatePlayer(
+                @HttpTrigger(name = "req", 
+                methods = {HttpMethod.POST}, 
+                route="v1/players", 
+                authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
+                final ExecutionContext context) {
+
+                String name = request.getBody().orElseGet(() -> request.getQueryParameters().get("name"));
+
+ 
+            return request.createResponseBuilder(HttpStatus.OK).body("ID: PlayerRecord is: " + name).build();
+        }
+
+        @FunctionName("test")
+        public HttpResponseMessage hello(
+            @HttpTrigger(name = "req", 
+            methods = {HttpMethod.POST},
+            route="v1/players/test/",  
+            authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
+            final ExecutionContext context)  {
+
+        context.getLogger().info("\nRequest body is: " + request.getBody().orElse(null) + "\n");
+        /*JsonCon
+        String name = request.getQueryParameters().getOrDefault("name", "");
+        context.getLogger().info("\nName is: " + name + "\n");*/
+
+    
+        return request.createResponseBuilder(HttpStatus.OK).body("\n").build();
+    
+    }
+}
 
