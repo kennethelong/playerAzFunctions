@@ -1,5 +1,7 @@
 package com.playerazfunctions;
 
+import com.google.gson.JsonObject;
+
 public class PlayerRecord {
     private String playerID;
     private String playerName;
@@ -15,6 +17,15 @@ public class PlayerRecord {
         this.region = region;
         this.positionAsString = positionString;
         this.accessToken = accessTokenIsInCave;
+    }
+
+    public PlayerRecord(JsonObject playerJsonObject) {
+        this.playerID = playerJsonObject.get("playerID").getAsString();
+        this.playerName = playerJsonObject.get("playerName").getAsString();
+        this.groupName = playerJsonObject.get("groupName").getAsString();
+        this.region = playerJsonObject.get("region").getAsString();
+        this.positionAsString = playerJsonObject.get("positionAsString").getAsString();
+        this.accessToken = playerJsonObject.get("accessToken").getAsString();
     }
 
     public String getPlayerID() {
