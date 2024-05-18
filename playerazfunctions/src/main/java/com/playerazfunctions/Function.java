@@ -118,11 +118,13 @@ public class Function {
     @FunctionName("getPlayersAtPosition")
     public HttpResponseMessage getPlayersAtPosition(
         @HttpTrigger(name = "req", 
-        methods = {HttpMethod.POST}, 
-        route="/api/v1/players/position/{pos}", 
+        methods = {HttpMethod.GET}, 
+        route="v1/players/position/{pos}", 
         authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
         @BindingName("pos")String pos,
         final ExecutionContext context) {
+
+            System.out.println("Inside the getPlayersAtPosition method");
 
             if (!validatePositionFormat(pos)){
                 return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("\n").build();

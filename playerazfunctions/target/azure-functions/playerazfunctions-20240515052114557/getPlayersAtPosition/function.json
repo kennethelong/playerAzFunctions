@@ -1,13 +1,13 @@
 {
   "scriptFile" : "../playerazfunctions-1.0-SNAPSHOT.jar",
-  "entryPoint" : "com.playerazfunctions.Function.run",
+  "entryPoint" : "com.playerazfunctions.Function.getPlayersAtPosition",
   "bindings" : [ {
     "type" : "httpTrigger",
     "direction" : "in",
     "name" : "req",
-    "route" : "{customRoute}",
-    "methods" : [ "GET", "POST" ],
-    "authLevel" : "FUNCTION"
+    "route" : "v1/players/position/{pos}",
+    "methods" : [ "GET" ],
+    "authLevel" : "ANONYMOUS"
   }, {
     "type" : "http",
     "direction" : "out",
