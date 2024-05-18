@@ -1,0 +1,16 @@
+{
+  "scriptFile" : "../playerazfunctions-1.0-SNAPSHOT.jar",
+  "entryPoint" : "com.playerazfunctions.Function.run2",
+  "bindings" : [ {
+    "type" : "httpTrigger",
+    "direction" : "in",
+    "name" : "req",
+    "route" : "v1/players/{id}",
+    "methods" : [ "GET" ],
+    "authLevel" : "ANONYMOUS"
+  }, {
+    "type" : "http",
+    "direction" : "out",
+    "name" : "$return"
+  } ]
+}

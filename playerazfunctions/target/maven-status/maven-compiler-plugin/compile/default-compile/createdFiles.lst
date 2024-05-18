@@ -1,0 +1,4 @@
+com/playerazfunctions/StorageInterface.class
+com/playerazfunctions/Function.class
+com/playerazfunctions/PlayerRecord.class
+com/playerazfunctions/InMemoryStorage.class

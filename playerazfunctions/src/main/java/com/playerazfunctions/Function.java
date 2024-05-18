@@ -6,6 +6,7 @@ import com.microsoft.azure.functions.HttpRequestMessage;
 import com.microsoft.azure.functions.HttpResponseMessage;
 import com.microsoft.azure.functions.HttpStatus;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
+import com.microsoft.azure.functions.annotation.BindingName;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 
@@ -20,24 +21,51 @@ public class Function {
      * 1. curl -d "HTTP Body" {your host}/api/HttpExample
      * 2. curl "{your host}/api/HttpExample?name=HTTP%20Query"
      */
-    @FunctionName("HttpExample")
-    public HttpResponseMessage run(
-            @HttpTrigger(
-                name = "req",
-                methods = {HttpMethod.GET, HttpMethod.POST},
-                authLevel = AuthorizationLevel.ANONYMOUS)
-                HttpRequestMessage<Optional<String>> request,
+
+     private static StorageInterface fakeDB = new InMemoryStorage();
+     PlayerRecord updatePR = new PlayerRecord("231", "Psyck", "Ops", "ODENSE", "(0,0,0)", "yes");
+
+     String returnedString = fakeDB.initialize();
+
+     @FunctionName("HttpTrigger-Java")
+     public HttpResponseMessage run(
+             @HttpTrigger(name = "req", 
+             methods = {HttpMethod.GET, HttpMethod.POST}, 
+             route="{customRoute}", 
+             authLevel = AuthorizationLevel.FUNCTION) HttpRequestMessage<Optional<String>> request,
+             @BindingName("customRoute")String route,
+             final ExecutionContext context) {
+         context.getLogger().info("Java HTTP trigger processed a request.");
+     
+         if(route.equals("home")){
+             return request.createResponseBuilder(HttpStatus.OK).body("Home route request").build();
+         }
+         else if(route.equals("id")){
+             return request.createResponseBuilder(HttpStatus.OK).body("Id route request").build();
+         }
+         else{
+             return request.createResponseBuilder(HttpStatus.NOT_FOUND).body("Not a valid route").build();
+         }
+     }
+
+    //get a player by player id
+    @FunctionName("getPlayerById")
+    public HttpResponseMessage run2(
+            @HttpTrigger(name = "req", 
+            methods = {HttpMethod.GET}, 
+            route="v1/players/{id}", 
+            authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
+            @BindingName("id")String id,
             final ExecutionContext context) {
-        context.getLogger().info("Java HTTP trigger processed a request.");
+        
+                //Get the player with the inputted ID
+        PlayerRecord pr = fakeDB.getPlayerByID(id);
 
-        // Parse query parameter
-        final String query = request.getQueryParameters().get("name");
-        final String name = request.getBody().orElse(query);
-
-        if (name == null) {
-            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Please pass a name on the query string or in the request body").build();
-        } else {
-            return request.createResponseBuilder(HttpStatus.OK).body("Hello, " + name).build();
-        }
+        //If there is no player with the ID
+        if(pr == null){
+            return request.createResponseBuilder(HttpStatus.OK).body("Player with: " + id + " does not exist").build();
+        }    
+        return request.createResponseBuilder(HttpStatus.OK).body("ID: " + id + " PlayerRecord is: " + pr.toString()).build();
     }
-}
+   }
+
