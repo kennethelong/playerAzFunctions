@@ -9,28 +9,22 @@ import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.BindingName;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
-
 import java.util.List;
 import java.util.Optional;
-
-//import com.google.gson.Gson;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 
 
 /**
- * Azure Functions with HTTP Trigger.
+ * Azure Functions with three endpoint to get a player, update or add a player and get all players at a certain position.
  */
 public class Function {
-    /**
-     * This function listens at endpoint "/api/HttpExample". Two ways to invoke it using "curl" command in bash:
-     * 1. curl -d "HTTP Body" {your host}/api/HttpExample
-     * 2. curl "{your host}/api/HttpExample?name=HTTP%20Query"
-     */
 
      private static StorageInterface fakeDB = new InMemoryStorage();
      String returnedString = fakeDB.initialize();
+     private Gson gson;
 
     //get a player by player id
     @FunctionName("getPlayerById")
@@ -44,12 +38,15 @@ public class Function {
         
         //Get the player with the inputted ID
         PlayerRecord pr = fakeDB.getPlayerByID(id);
-
-        //If there is no player with the ID
-        if(pr == null){
-            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Player with: " + id + " does not exist").build();
+        if(pr != null){
+            System.out.println("I got this playerID: " + fakeDB.getPlayerByID(id));
         }
-        
+
+        //If there is no player with the ID a not found reponse is returned
+        if(pr == null){
+            return request.createResponseBuilder(HttpStatus.NOT_FOUND).body("Player with: " + id + " does not exist").build();
+        }
+
         JsonObject playerAsJson = new JsonObject();
         playerAsJson.addProperty("playerID", pr.getPlayerID());
         playerAsJson.addProperty("playerName", pr.getPlayerName());
@@ -58,40 +55,71 @@ public class Function {
         playerAsJson.addProperty("positionAsString", pr.getPositionAsString());
         playerAsJson.addProperty("accessToken", pr.getAccessToken());
 
-        // Set the response status and send the response
-        return request.createResponseBuilder(HttpStatus.OK).body(playerAsJson.toString()).build();
+        /*
+
+        //Converts the JSON to a string
+        //String playerAsJson = gson.toJson(pr);
+
+        String playerAsJson;
+        try {
+            playerAsJson = gson.toJson(pr);
+        } catch (Exception e) {
+            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("\n").build();
+        }*/
+
+        // Set the response status and send the response including the player as JSON
+        return request.createResponseBuilder(HttpStatus.OK).body(playerAsJson).build();
     }
 
     //Update or add player
-    @FunctionName("updatePlayer")
-    public HttpResponseMessage updatePlayer(
+    @FunctionName("addOrUpdatePlayer")
+    public HttpResponseMessage addOrUpdatePlayer(
         @HttpTrigger(name = "req", 
         methods = {HttpMethod.POST},
         route="v1/players",  
         authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
         final ExecutionContext context)  {
 
-        String tempString = request.getBody().orElse(null);
+            //Extracts the request as a String
+            String requestBodyString = request.getBody().orElse(null);
 
-        context.getLogger().info("\nRequest body is: " + tempString);
-     
-        JsonObject playerJsonObject = JsonParser.parseString(tempString).getAsJsonObject();
-        PlayerRecord player = new PlayerRecord(playerJsonObject);
+            JsonObject playerJsonObject;
+            PlayerRecord player;
 
-        // Ensure that the player data is valid
-        if (player.getPlayerID() == null || player.getPlayerName() == null ||
-                player.getGroupName() == null || player.getRegion() == null ||
-                player.getPositionAsString() == null) {
+            //Tries to convert the string in a player record
+            /*try {
+                playerJsonObject = JsonParser.parseString(requestBodyString).getAsJsonObject();
+                player = gson.fromJson(playerJsonObject, PlayerRecord.class);
+            } catch (Exception e) {
+                return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Could not convert player to json").build();
+            }*/
+
+            playerJsonObject = JsonParser.parseString(requestBodyString).getAsJsonObject();
+            player = new PlayerRecord(playerJsonObject);
+
+            // Ensure that the player data is valid
+            if (!validatePlayerRecord(player)) {
                 return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("\n").build();
-            }
+            }                
 
-        fakeDB.updatePlayerRecord(player);
-        System.out.println("Player was added");
+            //Adding hte player to the database
+            fakeDB.updatePlayerRecord(player);
+            System.out.println("Player: " + player.getPlayerID() + " was added");
 
-        return request.createResponseBuilder(HttpStatus.OK).body("\n").build();    
+            return request.createResponseBuilder(HttpStatus.OK).body("\n").build();    
     }
 
-    //xx
+    //Method to verify that the player record contains information
+    private boolean validatePlayerRecord(PlayerRecord pr) {
+        return
+            pr.getPlayerID() != null &&
+            pr.getPlayerName() != null &&
+            pr.getGroupName() != null &&
+            pr.getPositionAsString() != null &&
+            pr.getRegion() != null;
+    }
+
+    //Get all players at a certain position
     @FunctionName("getPlayersAtPosition")
     public HttpResponseMessage getPlayersAtPosition(
         @HttpTrigger(name = "req", 
@@ -103,25 +131,30 @@ public class Function {
 
             System.out.println("Inside the getPlayersAtPosition method");
 
+            //Validate the position input string is correctly formatted
             if (!validatePositionFormat(pos)){
                 return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("\n").build();
             }
 
+            //Requests the storage for all players at a certain position
             List<PlayerRecord> players = fakeDB.computeListOfPlayersAt(pos);
 
             String returnValue = formatToJson(players);
             System.out.println("Returned value is: "+ returnValue);
+            
+            //Check is there are any players in the room
             if(returnValue.equals("{\"players\":[]}")){
                 System.out.println("No player are in that room");
                 return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("\n").build();
             }
 
-            // Set the response status and send the response     
+            // Set the response status and send a string with the players
             return request.createResponseBuilder(HttpStatus.OK).body(returnValue).build();
     }
 
+    //Method to validate the position in correctly formatted
     private boolean validatePositionFormat(String positionString) {
-        // Check if the input is already in the desired format (0,0,0)
+        // Check if the input is already in the desired format (int,int,int)
         if (positionString.startsWith("(") && positionString.endsWith(")")) {
             // Remove parentheses
             String content = positionString.substring(1, positionString.length() - 1);

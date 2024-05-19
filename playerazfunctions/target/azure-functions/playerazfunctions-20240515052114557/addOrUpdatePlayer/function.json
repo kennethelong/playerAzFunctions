@@ -1,6 +1,6 @@
 {
   "scriptFile" : "../playerazfunctions-1.0-SNAPSHOT.jar",
-  "entryPoint" : "com.playerazfunctions.Function.updatePlayer",
+  "entryPoint" : "com.playerazfunctions.Function.addOrUpdatePlayer",
   "bindings" : [ {
     "type" : "httpTrigger",
     "direction" : "in",
