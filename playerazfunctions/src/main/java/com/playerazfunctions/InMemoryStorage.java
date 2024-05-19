@@ -63,14 +63,12 @@ public class InMemoryStorage implements StorageInterface{
     public List<PlayerRecord> computeListOfPlayersAt(String positionString) {
         List<PlayerRecord> playerList = new ArrayList<>();    
 
-         playersInRoom.forEach((position, playerId) -> {
-            System.out.println("Inside the forEach loop");
-            if (position.equals(positionString)) {
-                PlayerRecord player = fakePlayerData.get(playerId);
-                System.out.print("I'm adding:" + player + "\n");
-                playerList.add(player);
+        for (String id : fakePlayerData.keySet()) {
+            PlayerRecord ps = fakePlayerData.get(id);
+            if (ps.isInCave() && ps.getPositionAsString().equals(positionString)) {
+                playerList.add(ps);
             }
-        });
+        }
 
         return playerList;
     }
