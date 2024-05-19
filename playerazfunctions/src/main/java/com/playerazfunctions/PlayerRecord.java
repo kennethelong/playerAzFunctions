@@ -2,6 +2,16 @@ package com.playerazfunctions;
 
 import com.google.gson.JsonObject;
 
+/**
+ * This is a record type (struct / PODO (Plain Old Data Object)) representing
+ * the core data of a player like name, id, position, etc.
+ * <p>
+ * A record is a pure data object without any behavior, suitable for
+ * networking and persistence as it only contains data.
+ *
+ * @author Henrik Baerbak Christensen, Aarhus University.
+ */
+
 public class PlayerRecord {
     private String playerID;
     private String playerName;

@@ -11,7 +11,5 @@ public interface StorageInterface {
     void updatePlayerRecord(PlayerRecord record);
 
     List<PlayerRecord> computeListOfPlayersAt(String positionString);
-
-
     
 }

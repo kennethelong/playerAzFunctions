@@ -18,15 +18,20 @@ import com.google.gson.JsonParser;
 
 
 /**
- * Azure Functions with three endpoint to get a player, update or add a player and get all players at a certain position.
+ * These Azure Functions are a rebuild of a mincroservice named player microservice, which was carved out from the monolithic application SkyCaveOpen.
+ * The purpose of the microservices was to refactor the SkyCaveOpen application into three microservices, the player microservice being one of them,
+ * as part of a educational project to get comfortable building microservices.
+ * 
+ * This project has opted to rebuild the player microservices using Azure Functions. It exposes the same three endpoint as the orginal microservice 1)
+ * get a player, 2) update or add a player and 3) get all players at a certain position.
  */
 public class Function {
 
      private static StorageInterface fakeDB = new InMemoryStorage();
-     String returnedString = fakeDB.initialize();
+     String returnString = fakeDB.initialize();
      private Gson gson;
 
-    //get a player by player id
+    // Get a player by player id
     @FunctionName("getPlayerById")
     public HttpResponseMessage getPlayerById(
             @HttpTrigger(name = "req", 
@@ -36,13 +41,10 @@ public class Function {
             @BindingName("id")String id,
             final ExecutionContext context) {
         
-        //Get the player with the inputted ID
+        // Get the player with the inputted ID
         PlayerRecord pr = fakeDB.getPlayerByID(id);
-        if(pr != null){
-            System.out.println("I got this playerID: " + fakeDB.getPlayerByID(id));
-        }
 
-        //If there is no player with the ID a not found reponse is returned
+        // If there is no player with the ID a not_found reponse is returned
         if(pr == null){
             return request.createResponseBuilder(HttpStatus.NOT_FOUND).body("Player with: " + id + " does not exist").build();
         }
@@ -55,9 +57,8 @@ public class Function {
         playerAsJson.addProperty("positionAsString", pr.getPositionAsString());
         playerAsJson.addProperty("accessToken", pr.getAccessToken());
 
-        /*
-
-        //Converts the JSON to a string
+        /* Could not get this code to work!
+        // Converts the JSON to a string
         //String playerAsJson = gson.toJson(pr);
 
         String playerAsJson;
@@ -71,7 +72,7 @@ public class Function {
         return request.createResponseBuilder(HttpStatus.OK).body(playerAsJson).build();
     }
 
-    //Update or add player
+    // Update or add player
     @FunctionName("addOrUpdatePlayer")
     public HttpResponseMessage addOrUpdatePlayer(
         @HttpTrigger(name = "req", 
@@ -80,46 +81,38 @@ public class Function {
         authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
         final ExecutionContext context)  {
 
-            //Extracts the request as a String
+            // Extracts the request as a String
             String requestBodyString = request.getBody().orElse(null);
 
-            JsonObject playerJsonObject;
+            // Could not get this code to work
+            // Tries to convert the string in a player record
+            /*JsonObject playerJsonObject;
             PlayerRecord player;
-
-            //Tries to convert the string in a player record
-            /*try {
+            try {
                 playerJsonObject = JsonParser.parseString(requestBodyString).getAsJsonObject();
                 player = gson.fromJson(playerJsonObject, PlayerRecord.class);
             } catch (Exception e) {
                 return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Could not convert player to json").build();
             }*/
 
-            playerJsonObject = JsonParser.parseString(requestBodyString).getAsJsonObject();
-            player = new PlayerRecord(playerJsonObject);
+            JsonObject playerJsonObject = JsonParser.parseString(requestBodyString).getAsJsonObject();
+            PlayerRecord player = new PlayerRecord(playerJsonObject);
 
             // Ensure that the player data is valid
             if (!validatePlayerRecord(player)) {
                 return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("\n").build();
             }                
 
-            //Adding hte player to the database
+            // Adding hte player to the database
             fakeDB.updatePlayerRecord(player);
             System.out.println("Player: " + player.getPlayerID() + " was added");
 
             return request.createResponseBuilder(HttpStatus.OK).body("\n").build();    
     }
 
-    //Method to verify that the player record contains information
-    private boolean validatePlayerRecord(PlayerRecord pr) {
-        return
-            pr.getPlayerID() != null &&
-            pr.getPlayerName() != null &&
-            pr.getGroupName() != null &&
-            pr.getPositionAsString() != null &&
-            pr.getRegion() != null;
-    }
 
-    //Get all players at a certain position
+
+    // Get all players at a certain position
     @FunctionName("getPlayersAtPosition")
     public HttpResponseMessage getPlayersAtPosition(
         @HttpTrigger(name = "req", 
@@ -131,18 +124,18 @@ public class Function {
 
             System.out.println("Inside the getPlayersAtPosition method");
 
-            //Validate the position input string is correctly formatted
+            // Validate the position input string is correctly formatted
             if (!validatePositionFormat(pos)){
                 return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("\n").build();
             }
 
-            //Requests the storage for all players at a certain position
+            // Requests the storage for all players at a certain position
             List<PlayerRecord> players = fakeDB.computeListOfPlayersAt(pos);
 
             String returnValue = formatToJson(players);
             System.out.println("Returned value is: "+ returnValue);
             
-            //Check is there are any players in the room
+            // Check is there are any players in the room
             if(returnValue.equals("{\"players\":[]}")){
                 System.out.println("No player are in that room");
                 return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("\n").build();
@@ -152,7 +145,19 @@ public class Function {
             return request.createResponseBuilder(HttpStatus.OK).body(returnValue).build();
     }
 
-    //Method to validate the position in correctly formatted
+    /** Helper methods below*/
+
+    // Method to verify that the player record contains information
+    private boolean validatePlayerRecord(PlayerRecord pr) {
+        return
+            pr.getPlayerID() != null &&
+            pr.getPlayerName() != null &&
+            pr.getGroupName() != null &&
+            pr.getPositionAsString() != null &&
+            pr.getRegion() != null;
+    }
+
+    // Method to validate the position in correctly formatted
     private boolean validatePositionFormat(String positionString) {
         // Check if the input is already in the desired format (int,int,int)
         if (positionString.startsWith("(") && positionString.endsWith(")")) {

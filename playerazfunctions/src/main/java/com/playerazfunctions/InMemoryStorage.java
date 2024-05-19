@@ -10,13 +10,12 @@ import java.util.Set;
 public class InMemoryStorage implements StorageInterface{
 
         private static Map<String, PlayerRecord> fakePlayerData = new HashMap<>();
-
-        private static Map<String, String> playersInRoom = new HashMap<>();
+        //private static Map<String, String> playersInRoom = new HashMap<>();
 
     @Override
     public String initialize() {    
 
-
+        //Adding players to the database
         updatePlayerRecord(new PlayerRecord("231", "Psyck", "Ops", "ODENSE", "(0,0,0)", "yes"));
         updatePlayerRecord(new PlayerRecord("456", "MainTakingOver", "Ops", "ODENSE", "(0,0,0)", "yes"));
         updatePlayerRecord(new PlayerRecord("879", "ObliviousNarc", "Tia2", "ODENSE", "(0,1,0)", "yes"));
@@ -24,16 +23,16 @@ public class InMemoryStorage implements StorageInterface{
 
         System.out.println("I'm being initialized. The hashmap is this long: " + fakePlayerData.size());
 
+        // I'm unable to get it to work as a void method, hence implemented to return a string 
         return "ok";
     }
 
     @Override
     public PlayerRecord getPlayerByID(String playerID) {
 
-        System.out.println("You are inside the getPlayerId method");
         //Return a null if the player does not exist
         if (!fakePlayerData.containsKey(playerID)) {
-            System.out.println("Returning null playerRecord");
+            //System.out.println("Returning null playerRecord");
             return null;
         }
         return fakePlayerData.get(playerID);
@@ -41,15 +40,13 @@ public class InMemoryStorage implements StorageInterface{
 
     @Override
     public void updatePlayerRecord(PlayerRecord record) {
-        //String playerId = record.getPlayerID();
-
-        //PlayerRecord playerBeforeUpdate = fakePlayerData.get(playerId);
 
         // Update or add the player record
         fakePlayerData.put(record.getPlayerID(), record);
         PlayerRecord tempPR = fakePlayerData.get(record.getPlayerID());
-        System.out.println("I've inserted this record in the hashmap: " + tempPR);
-
+        System.out.println("I've inserted this record in the hashmap: " + tempPR + " and the hashmap is this long: " + fakePlayerData.size());
+        
+        // Unsure if this is required
         // Update PLAYERS_IN_ROOM last position and new position
         /*if (playerBeforeUpdate != null && playerBeforeUpdate.isInCave()) {
             playersInRoom.remove(playerBeforeUpdate.getPositionAsString(), playerId);
@@ -70,7 +67,6 @@ public class InMemoryStorage implements StorageInterface{
                 playerList.add(ps);
             }
         }
-
         return playerList;
     }
     
