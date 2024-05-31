@@ -12,6 +12,7 @@ import com.microsoft.azure.functions.annotation.HttpTrigger;
 import java.util.List;
 import java.util.Optional;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
@@ -30,6 +31,10 @@ public class Function {
      private static StorageInterface fakeDB = new InMemoryStorage();
      String returnString = fakeDB.initialize();
      private Gson gson;
+     
+     public Function(){
+        gson = new GsonBuilder().serializeNulls().create();
+     }
 
     // Get a player by player id
     @FunctionName("getPlayerById")
@@ -49,24 +54,25 @@ public class Function {
             return request.createResponseBuilder(HttpStatus.NOT_FOUND).body("Player with: " + id + " does not exist").build();
         }
 
-        JsonObject playerAsJson = new JsonObject();
+        /*JsonObject playerAsJson = new JsonObject();
         playerAsJson.addProperty("playerID", pr.getPlayerID());
         playerAsJson.addProperty("playerName", pr.getPlayerName());
         playerAsJson.addProperty("groupName", pr.getGroupName());
         playerAsJson.addProperty("region", pr.getRegion());
         playerAsJson.addProperty("positionAsString", pr.getPositionAsString());
-        playerAsJson.addProperty("accessToken", pr.getAccessToken());
+        playerAsJson.addProperty("accessToken", pr.getAccessToken());*/
 
-        /* Could not get this code to work!
+        // Could not get this code to work!
         // Converts the JSON to a string
-        //String playerAsJson = gson.toJson(pr);
+        System.out.println("Returning pr" + pr);
+        String playerAsJson = gson.toJson(pr);
 
-        String playerAsJson;
+        //String playerAsJson;
         try {
             playerAsJson = gson.toJson(pr);
         } catch (Exception e) {
-            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("\n").build();
-        }*/
+            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).build();
+        }
 
         // Set the response status and send the response including the player as JSON
         return request.createResponseBuilder(HttpStatus.OK).body(playerAsJson).build();
@@ -86,28 +92,28 @@ public class Function {
 
             // Could not get this code to work
             // Tries to convert the string in a player record
-            /*JsonObject playerJsonObject;
+            JsonObject playerJsonObject;
             PlayerRecord player;
             try {
                 playerJsonObject = JsonParser.parseString(requestBodyString).getAsJsonObject();
                 player = gson.fromJson(playerJsonObject, PlayerRecord.class);
             } catch (Exception e) {
                 return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Could not convert player to json").build();
-            }*/
+            }
 
-            JsonObject playerJsonObject = JsonParser.parseString(requestBodyString).getAsJsonObject();
-            PlayerRecord player = new PlayerRecord(playerJsonObject);
+            /*JsonObject playerJsonObject = JsonParser.parseString(requestBodyString).getAsJsonObject();
+            PlayerRecord player = new PlayerRecord(playerJsonObject);*/
 
             // Ensure that the player data is valid
             if (!validatePlayerRecord(player)) {
-                return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("\n").build();
+                //return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("\n").build();
             }                
 
             // Adding hte player to the database
             fakeDB.updatePlayerRecord(player);
-            System.out.println("Player: " + player.getPlayerID() + " was added");
+            //System.out.println("Player: " + player.getPlayerID() + " was added");
 
-            return request.createResponseBuilder(HttpStatus.OK).body("\n").build();    
+            return request.createResponseBuilder(HttpStatus.OK).build();    
     }
 
 

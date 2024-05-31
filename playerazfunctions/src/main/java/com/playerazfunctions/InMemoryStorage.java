@@ -20,6 +20,7 @@ public class InMemoryStorage implements StorageInterface{
         updatePlayerRecord(new PlayerRecord("456", "MainTakingOver", "Ops", "ODENSE", "(0,0,0)", "yes"));
         updatePlayerRecord(new PlayerRecord("879", "ObliviousNarc", "Tia2", "ODENSE", "(0,1,0)", "yes"));
         updatePlayerRecord(new PlayerRecord("725", "Fam1lyaGround", "Tia2", "ODENSE", "(0,0,0)", "yes"));
+        updatePlayerRecord(new PlayerRecord("magnus_aarskort", "Fam1lyaGround", "Tia2", "ODENSE", "(0,0,0)", "yes"));
 
         System.out.println("I'm being initialized. The hashmap is this long: " + fakePlayerData.size());
 
