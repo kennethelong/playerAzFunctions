@@ -34,24 +34,32 @@ public class Function {
      
      public Function(){
         gson = new GsonBuilder().serializeNulls().create();
+        System.out.println("Version 3");
      }
 
     // Get a player by player id
     @FunctionName("getPlayerById")
     public HttpResponseMessage getPlayerById(
             @HttpTrigger(name = "req", 
-            methods = {HttpMethod.GET}, 
+            methods = {HttpMethod.GET, HttpMethod.POST}, 
             route="v1/players/{id}", 
             authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
             @BindingName("id")String id,
             final ExecutionContext context) {
         
-        // Get the player with the inputted ID
+                System.out.println("I'm in the getPlayerById method and got this ID: " + id);
+                
+                // Get the player with the inputted ID
         PlayerRecord pr = fakeDB.getPlayerByID(id);
+
+        System.out.println("I'm in the getPlayerById method and got this playerRecord: " + pr);
+
 
         // If there is no player with the ID a not_found reponse is returned
         if(pr == null){
-            return request.createResponseBuilder(HttpStatus.NOT_FOUND).body("Player with: " + id + " does not exist").build();
+            //return request.createResponseBuilder(HttpStatus.NOT_FOUND).body("Player with: " + id + " does not exist").build();
+            System.out.println("I'm in the if pr == null - version 5");
+            return request.createResponseBuilder(HttpStatus.NOT_FOUND).body("").build();
         }
 
         /*JsonObject playerAsJson = new JsonObject();
@@ -82,13 +90,15 @@ public class Function {
     @FunctionName("addOrUpdatePlayer")
     public HttpResponseMessage addOrUpdatePlayer(
         @HttpTrigger(name = "req", 
-        methods = {HttpMethod.POST},
+        methods = {HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT},
         route="v1/players",  
         authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
         final ExecutionContext context)  {
 
             // Extracts the request as a String
+            System.out.println("I'm in the addOrUpdatePlayer method - v1");
             String requestBodyString = request.getBody().orElse(null);
+            System.out.println("I'm in the addOrUpdatePlayer method and got this string: " + requestBodyString);
 
             // Could not get this code to work
             // Tries to convert the string in a player record

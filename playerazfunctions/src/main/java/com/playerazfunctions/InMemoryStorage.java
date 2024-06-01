@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+//import java.util.Set;
 
 
 public class InMemoryStorage implements StorageInterface{
@@ -22,7 +22,7 @@ public class InMemoryStorage implements StorageInterface{
         updatePlayerRecord(new PlayerRecord("725", "Fam1lyaGround", "Tia2", "ODENSE", "(0,0,0)", "yes"));
         updatePlayerRecord(new PlayerRecord("magnus_aarskort", "Fam1lyaGround", "Tia2", "ODENSE", "(0,0,0)", "yes"));
 
-        System.out.println("I'm being initialized. The hashmap is this long: " + fakePlayerData.size());
+        //System.out.println("I'm being initialized. The hashmap is this long: " + fakePlayerData.size());
 
         // I'm unable to get it to work as a void method, hence implemented to return a string 
         return "ok";
@@ -33,7 +33,7 @@ public class InMemoryStorage implements StorageInterface{
 
         //Return a null if the player does not exist
         if (!fakePlayerData.containsKey(playerID)) {
-            //System.out.println("Returning null playerRecord");
+            System.out.println("I'm in the getPlayerByID in InMemoryStorage and I'm returning null");
             return null;
         }
         return fakePlayerData.get(playerID);

@@ -6,7 +6,7 @@
     "direction" : "in",
     "name" : "req",
     "route" : "v1/players/{id}",
-    "methods" : [ "GET" ],
+    "methods" : [ "GET", "POST" ],
     "authLevel" : "ANONYMOUS"
   }, {
     "type" : "http",
