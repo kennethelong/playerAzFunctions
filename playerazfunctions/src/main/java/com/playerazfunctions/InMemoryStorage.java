@@ -10,8 +10,7 @@ import java.util.Map;
 public class InMemoryStorage implements StorageInterface{
 
         private static Map<String, PlayerRecord> fakePlayerData = new HashMap<>();
-        //private static Map<String, String> playersInRoom = new HashMap<>();
-
+        
     @Override
     public String initialize() {    
 
@@ -20,9 +19,6 @@ public class InMemoryStorage implements StorageInterface{
         updatePlayerRecord(new PlayerRecord("456", "MainTakingOver", "Ops", "ODENSE", "(0,0,0)", "yes"));
         updatePlayerRecord(new PlayerRecord("879", "ObliviousNarc", "Tia2", "ODENSE", "(0,1,0)", "yes"));
         updatePlayerRecord(new PlayerRecord("725", "Fam1lyaGround", "Tia2", "ODENSE", "(0,0,0)", "yes"));
-        updatePlayerRecord(new PlayerRecord("magnus_aarskort", "Fam1lyaGround", "Tia2", "ODENSE", "(0,0,0)", "yes"));
-
-        //System.out.println("I'm being initialized. The hashmap is this long: " + fakePlayerData.size());
 
         // I'm unable to get it to work as a void method, hence implemented to return a string 
         return "ok";
@@ -33,7 +29,6 @@ public class InMemoryStorage implements StorageInterface{
 
         //Return a null if the player does not exist
         if (!fakePlayerData.containsKey(playerID)) {
-            System.out.println("I'm in the getPlayerByID in InMemoryStorage and I'm returning null");
             return null;
         }
         return fakePlayerData.get(playerID);
@@ -44,18 +39,7 @@ public class InMemoryStorage implements StorageInterface{
 
         // Update or add the player record
         fakePlayerData.put(record.getPlayerID(), record);
-        PlayerRecord tempPR = fakePlayerData.get(record.getPlayerID());
-        System.out.println("I've inserted this record in the hashmap: " + tempPR + " and the hashmap is this long: " + fakePlayerData.size());
-        
-        // Unsure if this is required
-        // Update PLAYERS_IN_ROOM last position and new position
-        /*if (playerBeforeUpdate != null && playerBeforeUpdate.isInCave()) {
-            playersInRoom.remove(playerBeforeUpdate.getPositionAsString(), playerId);
-        }
-        if (record.isInCave()) {
-            System.out.println("adding to PlayersInRoom, player: " + playerId + " at potision: " + record.getPositionAsString());
-            playersInRoom.put(record.getPositionAsString(), playerId);
-        }*/
+        //PlayerRecord tempPR = fakePlayerData.get(record.getPlayerID());
     }
 
     @Override

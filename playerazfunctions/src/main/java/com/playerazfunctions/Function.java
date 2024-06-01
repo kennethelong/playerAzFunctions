@@ -47,44 +47,30 @@ public class Function {
             @BindingName("id")String id,
             final ExecutionContext context) {
         
-                System.out.println("I'm in the getPlayerById method and got this ID: " + id);
-                
                 // Get the player with the inputted ID
-        PlayerRecord pr = fakeDB.getPlayerByID(id);
+                PlayerRecord pr = fakeDB.getPlayerByID(id);
 
-        System.out.println("I'm in the getPlayerById method and got this playerRecord: " + pr);
+                //System.out.println("I'm in the getPlayerById method and got this playerRecord: " + pr);
 
 
-        // If there is no player with the ID a not_found reponse is returned
-        if(pr == null){
-            //return request.createResponseBuilder(HttpStatus.NOT_FOUND).body("Player with: " + id + " does not exist").build();
-            System.out.println("I'm in the if pr == null - version 5");
-            return request.createResponseBuilder(HttpStatus.NOT_FOUND).body("").build();
-        }
+                // If there is no player with the ID a not_found reponse is returned
+                if(pr == null){
+                    return request.createResponseBuilder(HttpStatus.NOT_FOUND).body("").build();
+                }
 
-        /*JsonObject playerAsJson = new JsonObject();
-        playerAsJson.addProperty("playerID", pr.getPlayerID());
-        playerAsJson.addProperty("playerName", pr.getPlayerName());
-        playerAsJson.addProperty("groupName", pr.getGroupName());
-        playerAsJson.addProperty("region", pr.getRegion());
-        playerAsJson.addProperty("positionAsString", pr.getPositionAsString());
-        playerAsJson.addProperty("accessToken", pr.getAccessToken());*/
+                // Converts the JSON to a string
+                String playerAsJson = gson.toJson(pr);
 
-        // Could not get this code to work!
-        // Converts the JSON to a string
-        System.out.println("Returning pr" + pr);
-        String playerAsJson = gson.toJson(pr);
+                //String playerAsJson;
+                try {
+                    playerAsJson = gson.toJson(pr);
+                } catch (Exception e) {
+                    return request.createResponseBuilder(HttpStatus.BAD_REQUEST).build();
+                }
 
-        //String playerAsJson;
-        try {
-            playerAsJson = gson.toJson(pr);
-        } catch (Exception e) {
-            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).build();
-        }
-
-        // Set the response status and send the response including the player as JSON
-        return request.createResponseBuilder(HttpStatus.OK).body(playerAsJson).build();
-    }
+                // Set the response status and send the response including the player as JSON
+                return request.createResponseBuilder(HttpStatus.OK).body(playerAsJson).build();
+            }
 
     // Update or add player
     @FunctionName("addOrUpdatePlayer")
@@ -96,12 +82,9 @@ public class Function {
         final ExecutionContext context)  {
 
             // Extracts the request as a String
-            System.out.println("I'm in the addOrUpdatePlayer method - v1");
             String requestBodyString = request.getBody().orElse(null);
-            System.out.println("I'm in the addOrUpdatePlayer method and got this string: " + requestBodyString);
-
-            // Could not get this code to work
-            // Tries to convert the string in a player record
+            
+            // Convert the string in a player record
             JsonObject playerJsonObject;
             PlayerRecord player;
             try {
@@ -111,18 +94,14 @@ public class Function {
                 return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Could not convert player to json").build();
             }
 
-            /*JsonObject playerJsonObject = JsonParser.parseString(requestBodyString).getAsJsonObject();
-            PlayerRecord player = new PlayerRecord(playerJsonObject);*/
-
             // Ensure that the player data is valid
             if (!validatePlayerRecord(player)) {
-                //return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("\n").build();
+                return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("\n").build();
             }                
 
             // Adding hte player to the database
             fakeDB.updatePlayerRecord(player);
-            //System.out.println("Player: " + player.getPlayerID() + " was added");
-
+            
             return request.createResponseBuilder(HttpStatus.OK).build();    
     }
 
@@ -138,8 +117,6 @@ public class Function {
         @BindingName("pos")String pos,
         final ExecutionContext context) {
 
-            System.out.println("Inside the getPlayersAtPosition method");
-
             // Validate the position input string is correctly formatted
             if (!validatePositionFormat(pos)){
                 return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("\n").build();
@@ -153,7 +130,7 @@ public class Function {
             
             // Check is there are any players in the room
             if(returnValue.equals("{\"players\":[]}")){
-                System.out.println("No player are in that room");
+                //System.out.println("No player are in that room");
                 return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("\n").build();
             }
 
